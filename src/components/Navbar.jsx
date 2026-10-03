@@ -42,17 +42,6 @@ export default function Navbar() {
           : 'border-b border-black/10 bg-white/90 text-black backdrop-blur-md',
       )}
     >
-      {/* Announcement bar */}
-      <div
-        className={cn(
-          'flex items-center justify-center gap-3 px-4 py-2 text-center text-[10px] font-semibold uppercase tracking-widest2 transition-colors',
-          transparent ? 'text-white/80' : 'text-white bg-black',
-        )}
-      >
-        <span className="hidden sm:inline">{t('freeDelivery')}</span>
-        <span className="sm:hidden">{t('freeDelivery')}</span>
-      </div>
-
       <div className="container-page flex h-16 items-center justify-between gap-4 lg:h-[72px]">
         {/* Logo */}
         <Link
