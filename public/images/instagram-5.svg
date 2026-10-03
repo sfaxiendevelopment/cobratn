@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 600" width="600" height="600" preserveAspectRatio="xMidYMid slice">
+  <rect width="600" height="600" fill="#0a0a0a"/>
+  <g stroke="#ffffff" stroke-opacity=".1" fill="none">
+    <circle cx="300" cy="300" r="90"/>
+    <circle cx="300" cy="300" r="180"/>
+    <circle cx="300" cy="300" r="270"/>
+  </g>
+  <text x="300" y="310" font-family="Montserrat, Arial, sans-serif" text-anchor="middle" font-size="72" font-weight="900" letter-spacing="10" fill="#ffffff">TN</text>
+  <text x="300" y="500" font-family="Montserrat, Arial, sans-serif" text-anchor="middle" font-size="22" font-weight="600" letter-spacing="10" fill="#b0b0b0">MADE IN TUNIS</text>
+</svg>

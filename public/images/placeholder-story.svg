@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 800" width="1200" height="800">
+  <defs>
+    <linearGradient id="g" x1="1" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#222222"/>
+      <stop offset="100%" stop-color="#0a0a0a"/>
+    </linearGradient>
+  </defs>
+  <rect width="1200" height="800" fill="url(#g)"/>
+  <g stroke="#ffffff" stroke-opacity=".07" fill="none">
+    <path d="M-50 200 C300 120 700 280 1250 160"/>
+    <path d="M-50 320 C300 260 700 420 1250 300"/>
+    <path d="M-50 440 C300 400 700 560 1250 440"/>
+    <path d="M-50 560 C300 540 700 700 1250 580"/>
+  </g>
+  <text x="90" y="360" font-family="Montserrat, Arial, sans-serif" font-size="110" font-weight="900" letter-spacing="4" fill="#ffffff">MORE THAN</text>
+  <text x="90" y="480" font-family="Montserrat, Arial, sans-serif" font-size="110" font-weight="900" letter-spacing="18" fill="#ffffff">CLOTHES.</text>
+  <text x="94" y="560" font-family="Montserrat, Arial, sans-serif" font-size="30" font-weight="600" letter-spacing="12" fill="#b0b0b0">IT'S A MINDSET</text>
+</svg>

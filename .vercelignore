@@ -1,0 +1,11 @@
+node_modules
+dist
+
+# Never upload secrets. Anything VITE_* is inlined into the public bundle.
+.env
+.env.*
+!.env.example
+
+.git
+.vercel
+*.log

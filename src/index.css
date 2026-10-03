@@ -1,0 +1,177 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html {
+    scroll-behavior: smooth;
+    -webkit-text-size-adjust: 100%;
+  }
+
+  body {
+    @apply bg-white text-black font-sans antialiased;
+    text-rendering: optimizeLegibility;
+  }
+
+  ::selection {
+    background: #000;
+    color: #fff;
+  }
+
+  img {
+    @apply select-none;
+  }
+
+  :focus-visible {
+    outline: 2px solid #000;
+    outline-offset: 2px;
+  }
+
+  input,
+  select,
+  textarea,
+  button {
+    font-family: inherit;
+  }
+
+  ::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+  }
+  ::-webkit-scrollbar-track {
+    background: #f5f5f5;
+  }
+  ::-webkit-scrollbar-thumb {
+    background: #151515;
+    border: 2px solid #f5f5f5;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: #000;
+  }
+}
+
+@layer components {
+  .container-page {
+    @apply mx-auto w-full max-w-page px-4 sm:px-6 lg:px-8;
+  }
+
+  .btn {
+    @apply inline-flex items-center justify-center gap-2 text-[11px] font-bold uppercase tracking-widest2 text-center
+      transition-all duration-300 cursor-pointer disabled:cursor-not-allowed disabled:opacity-40;
+  }
+
+  .btn-primary {
+    @apply btn bg-black text-white px-8 h-12 hover:bg-white hover:text-black border border-transparent hover:border-black;
+  }
+
+  .btn-secondary {
+    @apply btn border border-black bg-white text-black px-8 h-12 hover:bg-black hover:text-white;
+  }
+
+  .btn-light {
+    @apply btn bg-white text-black px-8 h-12 hover:bg-black hover:text-white;
+  }
+
+  .btn-dark-line {
+    @apply btn border border-white/40 bg-transparent text-white px-8 h-12 hover:bg-white hover:text-black hover:border-white;
+  }
+
+  .link-underline {
+    position: relative;
+  }
+  .link-underline::after {
+    content: '';
+    @apply absolute left-0 -bottom-1 h-px w-full bg-black scale-x-0 origin-left transition-transform duration-300;
+  }
+  .link-underline:hover::after,
+  .link-underline-active::after {
+    @apply scale-x-100;
+  }
+
+  .input {
+    @apply w-full h-12 border border-black/20 bg-white px-4 text-sm text-black placeholder:text-gray-400
+      focus:border-black focus:outline-none transition-colors duration-200;
+  }
+
+  .input-dark {
+    @apply w-full h-12 border border-white/20 bg-black px-4 text-sm text-white placeholder:text-white/40
+      focus:border-white focus:outline-none transition-colors duration-200;
+  }
+
+  .label {
+    @apply block text-[11px] font-semibold uppercase tracking-widest2 mb-2;
+  }
+
+  .section-title {
+    @apply text-2xl sm:text-3xl lg:text-4xl font-extrabold uppercase tracking-wide3;
+  }
+
+  .skeleton {
+    @apply relative overflow-hidden bg-neutral-200;
+    background-size: 200% 100%;
+    animation: shimmer 1.6s linear infinite;
+    background-image: linear-gradient(
+      90deg,
+      #ececec 25%,
+      #f7f7f7 50%,
+      #ececec 75%
+    );
+  }
+
+  .card {
+    @apply bg-white border border-black/10;
+  }
+
+  .hairline {
+    @apply border border-black/10;
+  }
+}
+
+/* Reusable scrollbar-hide */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+/* Prevent body scroll when an overlay is open */
+body.lock-scroll {
+  overflow: hidden;
+}
+
+/* Reveal-on-scroll helper (driven by IntersectionObserver) */
+.reveal {
+  opacity: 0;
+  transform: translateY(28px);
+  transition: opacity 0.7s ease, transform 0.7s ease;
+}
+.reveal.revealed {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* Product image crossfade on hover */
+.pcard-img {
+  transition: opacity 0.4s ease;
+}
+.pcard:hover .pcard-img-primary {
+  opacity: 0;
+}
+.pcard:hover .pcard-img-hover {
+  opacity: 1;
+}
+.pcard-img-hover {
+  opacity: 0;
+}
+
+/* Utility stripe divider */
+.stripe::after {
+  content: '';
+  display: block;
+  width: 56px;
+  height: 2px;
+  margin-top: 12px;
+  background: #000;
+}

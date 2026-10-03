@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 1000" width="800" height="1000">
+  <defs>
+    <linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#e8e8e8"/>
+      <stop offset="100%" stop-color="#bdbdbd"/>
+    </linearGradient>
+  </defs>
+  <rect width="800" height="1000" fill="url(#g)"/>
+  <rect x="330" y="280" width="140" height="480" fill="#000000" fill-opacity=".85"/>
+  <rect x="100" y="320" width="230" height="420" fill="#000000" fill-opacity=".35"/>
+  <rect x="470" y="320" width="230" height="420" fill="#000000" fill-opacity=".35"/>
+  <line x1="800" y1="0" x2="0" y2="1000" stroke="#000000" stroke-opacity=".06" stroke-width="60"/>
+  <circle cx="120" cy="100" r="10" fill="#000000" fill-opacity=".5"/>
+  <circle cx="680" cy="100" r="10" fill="#000000" fill-opacity=".5"/>
+  <text x="400" y="940" font-family="Montserrat, Arial, sans-serif" text-anchor="middle" font-size="34" font-weight="800" letter-spacing="8" fill="#111111">COBRA TN</text>
+</svg>

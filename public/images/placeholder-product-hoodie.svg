@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 1000" width="800" height="1000">
+  <defs>
+    <linearGradient id="g" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#2a2a2a"/>
+      <stop offset="100%" stop-color="#0d0d0d"/>
+    </linearGradient>
+  </defs>
+  <rect width="800" height="1000" fill="url(#g)"/>
+  <path d="M220 300 L400 260 L580 300 L620 460 L560 440 L540 660 L400 700 L260 660 L240 440 L180 460 Z" fill="#000000" fill-opacity=".55" stroke="#ffffff" stroke-opacity=".14" stroke-width="3"/>
+  <path d="M400 300 L400 680" stroke="#ffffff" stroke-opacity=".08" stroke-width="2"/>
+  <rect x="360" y="120" width="80" height="200" fill="#121212" stroke="#ffffff" stroke-opacity=".14" stroke-width="3"/>
+  <path d="M340 300c-40 30-60 90-40 130M460 300c40 30 60 90 40 130" stroke="#ffffff" stroke-opacity=".2" stroke-width="6" fill="none"/>
+  <circle cx="120" cy="100" r="10" fill="#ffffff" fill-opacity=".5"/>
+  <circle cx="680" cy="100" r="10" fill="#ffffff" fill-opacity=".5"/>
+  <text x="400" y="940" font-family="Montserrat, Arial, sans-serif" text-anchor="middle" font-size="34" font-weight="800" letter-spacing="8" fill="#ffffff" fill-opacity=".9">COBRA TN</text>
+</svg>

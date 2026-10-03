@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 600" width="600" height="600" preserveAspectRatio="xMidYMid slice">
+  <rect width="600" height="600" fill="#f0f0f0"/>
+  <g stroke="#000000" stroke-opacity=".16" fill="none">
+    <path d="M80 470 C200 380 400 540 520 430"/>
+    <path d="M80 490 C200 400 400 560 520 450"/>
+  </g>
+  <path d="M180 330q120-140 240 0" stroke="#000000" stroke-width="6" fill="none"/>
+  <path d="M220 380q90-120 160 0" stroke="#000000" stroke-width="4" fill="none" opacity=".5"/>
+  <text x="300" y="520" font-family="Montserrat, Arial, sans-serif" text-anchor="middle" font-size="24" font-weight="800" letter-spacing="8" fill="#111111">MOVEMENT</text>
+</svg>

@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 600" width="600" height="600" preserveAspectRatio="xMidYMid slice">
+  <rect width="600" height="600" fill="#0c0c0c"/>
+  <g stroke="#ffffff" stroke-opacity=".12" fill="none" stroke-width="2">
+    <circle cx="300" cy="300" r="80"/>
+    <circle cx="300" cy="300" r="160"/>
+    <circle cx="300" cy="300" r="240"/>
+  </g>
+  <path d="M300 160l40 120-40 40-40-40z" fill="#ffffff" fill-opacity=".9"/>
+  <text x="300" y="470" font-family="Montserrat, Arial, sans-serif" text-anchor="middle" font-size="34" font-weight="800" letter-spacing="8" fill="#ffffff">COBRA TN</text>
+</svg>

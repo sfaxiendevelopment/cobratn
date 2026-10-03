@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 1000" width="800" height="1000">
+  <defs>
+    <linearGradient id="g" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#1c1c1c"/>
+      <stop offset="100%" stop-color="#080808"/>
+    </linearGradient>
+  </defs>
+  <rect width="800" height="1000" fill="url(#g)"/>
+  <path d="M220 260 L400 240 L580 260 L580 700 L400 760 L220 700 Z" fill="#111111" stroke="#ffffff" stroke-opacity=".18" stroke-width="3"/>
+  <path d="M260 200 C300 220 360 220 400 200 M540 200 C500 220 440 220 400 200" fill="none" stroke="#ffffff" stroke-opacity=".25" stroke-width="8"/>
+  <line x1="400" y1="260" x2="400" y2="740" stroke="#ffffff" stroke-opacity=".1" stroke-width="2"/>
+  <circle cx="400" cy="420" r="34" fill="none" stroke="#ffffff" stroke-opacity=".3" stroke-width="3"/>
+  <text x="400" y="430" font-family="Montserrat, Arial, sans-serif" text-anchor="middle" font-size="18" font-weight="800" letter-spacing="4" fill="#ffffff" fill-opacity=".5">COBRA</text>
+  <circle cx="120" cy="100" r="10" fill="#ffffff" fill-opacity=".5"/>
+  <circle cx="680" cy="100" r="10" fill="#ffffff" fill-opacity=".5"/>
+  <text x="400" y="940" font-family="Montserrat, Arial, sans-serif" text-anchor="middle" font-size="34" font-weight="800" letter-spacing="8" fill="#ffffff" fill-opacity=".9">COBRA TN</text>
+</svg>
