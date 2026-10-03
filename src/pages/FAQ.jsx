@@ -8,7 +8,7 @@ const SECTIONS = [
   {
     title: 'Commandes & livraison',
     items: [
-      { q: 'Quel est le délai de livraison en Tunisie ?', a: "Les commandes sont expédiées sous 24 heures, du lundi au samedi. La livraison prend 1 à 5 jours ouvrables selon votre gouvernorat. Vous serez informé par SMS/WhatsApp dès l'expédition de votre commande." },
+      { q: 'Quel est le délai de livraison en Tunisie ?', a: "Les commandes sont expédiées sous 24 heures, du lundi au samedi. La livraison prend 48 heures selon votre gouvernorat. Vous serez informé par SMS/WhatsApp dès l'expédition de votre commande." },
       { q: 'Combien coûte la livraison ?', a: "Les frais de livraison sont fixés par gouvernorat et affichés clairement au moment de la validation, avant votre confirmation. Vous voyez toujours le montant exact avant de payer." },
       { q: 'Puis-je suivre ma commande ?', a: "Oui. Dès que vous confirmez, nous vous appelons sur le numéro que vous avez laissé pour valider l'envoi. Ensuite, contactez-nous avec votre numéro de commande et nous vous confirmerons son statut actuel." },
     ],

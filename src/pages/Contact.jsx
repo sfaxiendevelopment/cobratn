@@ -31,7 +31,7 @@ function contactMethods({ social, contact_email: email, contact_phone: phone }) 
 }
 
 const FAQS = [
-  { q: 'Quel est le délai de livraison ?', a: 'Les commandes sont expédiées sous 24 heures. La livraison en Tunisie prend généralement 1 à 5 jours ouvrables selon votre gouvernorat.' },
+  { q: 'Quel est le délai de livraison ?', a: 'Les commandes sont expédiées sous 24 heures. La livraison en Tunisie prend généralement 48 heures selon votre gouvernorat.' },
   { q: 'Proposez-vous le paiement à la livraison ?', a: 'Oui. Le paiement à la livraison est disponible partout en Tunisie. Le paiement par carte en ligne est en cours de déploiement.' },
   { q: 'Quelle est votre politique de retour ?', a: 'Les articles non portés peuvent être retournés dans les 14 jours suivant la livraison, étiquettes intactes, pour un remboursement intégral.' },
   { q: 'Comment connaître ma taille ?', a: 'Chaque fiche produit contient un guide des tailles. En cas de doute, prenez une taille au-dessus — nos pièces taillent légèrement près du corps.' },

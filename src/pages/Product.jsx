@@ -335,7 +335,7 @@ export default function ProductPage() {
           </div>
 
           <div className="mt-8 space-y-3 border-t border-black/10 pt-6 text-xs">
-            <p className="flex items-center gap-3 text-neutral-600"><IconTruck className="h-4 w-4 shrink-0" /> Livraison en 1 à 5 jours ouvrables partout en Tunisie.</p>
+            <p className="flex items-center gap-3 text-neutral-600"><IconTruck className="h-4 w-4 shrink-0" /> Livraison sous 48 heures partout en Tunisie.</p>
             <p className="flex items-center gap-3 text-neutral-600"><IconBox className="h-4 w-4 shrink-0" /> Livraison offerte dès 200 TND d'achat.</p>
             <p className="flex items-center gap-3 text-neutral-600"><IconCheck className="h-4 w-4 shrink-0" /> Paiement à la livraison disponible.</p>
           </div>
@@ -405,7 +405,7 @@ function DetailsTabs({ product }) {
         {tab === 'shipping' && (
           <div className="space-y-4">
             <p>
-              Les commandes sont expédiées sous 24 heures, du lundi au samedi. La livraison en Tunisie prend 1 à 5 jours ouvrables selon votre gouvernorat.
+              Les commandes sont expédiées sous 24 heures, du lundi au samedi. La livraison en Tunisie prend 48 heures selon votre gouvernorat.
             </p>
             <p>
               Les articles non portés peuvent être retournés dans les 14 jours suivant la livraison pour un remboursement intégral. Ils doivent être renvoyés avec leurs étiquettes.

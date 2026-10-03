@@ -158,7 +158,7 @@ export default function OrderSuccess() {
               : 'Conservez votre numéro de commande — la boutique vous confirmera par téléphone.'}
           </li>
           <li className="flex items-center gap-3">
-            <IconTruck className="h-4 w-4 shrink-0" /> Livraison partout en Tunisie, généralement sous 1 à 5 jours.
+            <IconTruck className="h-4 w-4 shrink-0" /> Livraison partout en Tunisie, généralement sous 48 heures.
           </li>
         </ul>
 

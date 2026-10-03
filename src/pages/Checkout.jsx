@@ -483,7 +483,7 @@ export default function Checkout() {
               <IconMail className="h-4 w-4 shrink-0" /> Nous appelons votre numéro pour confirmer avant l’envoi.
             </li>
             <li className="flex items-center gap-3">
-              <IconTruck className="h-4 w-4 shrink-0" /> Livraison partout en Tunisie, sous 1 à 5 jours.
+              <IconTruck className="h-4 w-4 shrink-0" /> Livraison partout en Tunisie, sous 48 heures.
             </li>
             <li className="flex items-center gap-3">
               <IconBox className="h-4 w-4 shrink-0" /> Paiement à la livraison. Aucune donnée de carte n’est demandée.
