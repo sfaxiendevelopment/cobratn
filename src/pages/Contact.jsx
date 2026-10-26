@@ -10,7 +10,6 @@ import {
   IconTiktok,
   IconFacebook,
   IconMail,
-  IconPhone,
   IconTruck,
   IconCheck,
   IconLock,
@@ -18,15 +17,20 @@ import {
 
 /**
  * Every row comes from Paramètres in the admin dashboard: the three social
- * links plus the contact email and phone. Nothing here is hardcoded.
+ * links plus the contact email addresses. Nothing here is hardcoded.
  */
-function contactMethods({ social, contact_email: email, contact_phone: phone }) {
+function contactMethods({ social, contact_email: emails }) {
   return [
     { key: 'instagram', label: 'Instagram', value: socialHandle(social.instagram, 'Instagram'), href: social.instagram, Icon: IconInstagram },
     { key: 'facebook', label: 'Facebook', value: socialHandle(social.facebook, 'Facebook'), href: social.facebook, Icon: IconFacebook },
     { key: 'tiktok', label: 'TikTok', value: socialHandle(social.tiktok, 'TikTok'), href: social.tiktok, Icon: IconTiktok },
-    { key: 'email', label: 'Email', value: email, href: `mailto:${email}`, Icon: IconMail },
-    { key: 'phone', label: 'Téléphone / WhatsApp', value: phone, href: `tel:${String(phone).replace(/[^\d+]/g, '')}`, Icon: IconPhone },
+    ...emails.split(/[,\n;]/).map((email) => email.trim()).filter(Boolean).map((email, index) => ({
+      key: `email-${index}`,
+      label: 'Email',
+      value: email,
+      href: `mailto:${email}`,
+      Icon: IconMail,
+    })),
   ]
 }
 

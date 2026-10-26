@@ -9,7 +9,12 @@
  * Deploy:
  *   supabase functions deploy order-notification --no-verify-jwt
  *
- * Transport is chosen by which secrets are present:
+ * Transport priority is EmailJS, then Resend, then Gmail SMTP:
+ *   EmailJS:
+ *     EMAILJS_SERVICE_ID
+ *     EMAILJS_TEMPLATE_ID
+ *     EMAILJS_PUBLIC_KEY
+ *     EMAILJS_PRIVATE_KEY
  *   Resend:
  *     RESEND_API_KEY   Resend API key
  *     ORDER_FROM       verified sender, e.g. "COBRA TN <orders@yourdomain.tn>"
@@ -17,7 +22,7 @@
  *     SMTP_USER        default cobratn0@gmail.com
  *     SMTP_PASS        Gmail App Password (16 chars, no spaces)
  * Optional (both transports):
- *   ORDER_TO           overrides admin_settings.contact_email / the built-in address
+ *   ORDER_TO           comma-separated recipients; overrides admin_settings.contact_email
  */
 
 import { createClient } from 'jsr:@supabase/supabase-js@2'
@@ -46,15 +51,134 @@ const esc = (value: unknown) =>
     .replace(/>/g, '&gt;')
     .replace(/"/g, '&quot;')
 
+const pdfText = (value: unknown) =>
+  String(value ?? '')
+    .normalize('NFKD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/[^\x20-\x7E]/g, '?')
+
+async function createOrderPdf(order: Record<string, unknown>, items: Record<string, unknown>[]) {
+  const { PDFDocument, StandardFonts, rgb } = await import('npm:pdf-lib@1.17.1')
+  const pdf = await PDFDocument.create()
+  const regular = await pdf.embedFont(StandardFonts.Helvetica)
+  const bold = await pdf.embedFont(StandardFonts.HelveticaBold)
+  const pageSize: [number, number] = [595.28, 841.89]
+  const margin = 46
+  const maxWidth = pageSize[0] - margin * 2
+  let page = pdf.addPage(pageSize)
+  let cursor = 52
+
+  const addPageIfNeeded = (height: number) => {
+    if (cursor + height > pageSize[1] - margin) {
+      page = pdf.addPage(pageSize)
+      cursor = 52
+    }
+  }
+
+  const line = (value: unknown, options: { size?: number; strong?: boolean; gap?: number } = {}) => {
+    const size = options.size ?? 10
+    const font = options.strong ? bold : regular
+    const words = pdfText(value).split(/\s+/)
+    let current = ''
+    const wrapped: string[] = []
+
+    for (const word of words) {
+      const candidate = current ? `${current} ${word}` : word
+      if (current && font.widthOfTextAtSize(candidate, size) > maxWidth) {
+        wrapped.push(current)
+        current = word
+      } else {
+        current = candidate
+      }
+    }
+    if (current) wrapped.push(current)
+
+    for (const text of wrapped) {
+      addPageIfNeeded(size + 6)
+      page.drawText(text, {
+        x: margin,
+        y: pageSize[1] - cursor - size,
+        size,
+        font,
+        color: rgb(0.08, 0.08, 0.08),
+      })
+      cursor += size + 6
+    }
+    cursor += options.gap ?? 0
+  }
+
+  const divider = () => {
+    addPageIfNeeded(12)
+    page.drawLine({
+      start: { x: margin, y: pageSize[1] - cursor },
+      end: { x: pageSize[0] - margin, y: pageSize[1] - cursor },
+      thickness: 0.8,
+      color: rgb(0.75, 0.75, 0.75),
+    })
+    cursor += 12
+  }
+
+  line('COBRA TN', { size: 11, strong: true })
+  line('ORDER DETAILS', { size: 22, strong: true, gap: 4 })
+  line(`Order #${order.order_number}`)
+  line(`Date: ${new Date(String(order.created_at)).toUTCString()}`)
+  cursor += 6
+  divider()
+  line('ITEMS', { size: 13, strong: true, gap: 4 })
+  for (const item of items) {
+    line(`${item.product_name} | ${[item.color, item.size].filter(Boolean).join(' / ') || 'One size'}`, {
+      strong: true,
+    })
+    line(`Quantity: ${item.quantity} | Unit price: ${money(item.unit_price)} | Line total: ${money(item.total_price)}`, {
+      gap: 4,
+    })
+  }
+  divider()
+  line(`Subtotal: ${money(order.subtotal)}`)
+  if (Number(order.discount) > 0) line(`Discount: ${money(order.discount)}`)
+  line(`Shipping: ${money(order.shipping_cost)}`)
+  line('Tax: 0.00 TND')
+  line(`TOTAL: ${money(order.total)}`, { size: 13, strong: true, gap: 4 })
+  divider()
+  line('CUSTOMER AND DELIVERY', { size: 13, strong: true, gap: 4 })
+  line(`Name: ${order.customer_name}`)
+  line(`Email: ${order.customer_email}`)
+  line(`Phone: ${order.phone}`)
+  line(`Address: ${order.address}, ${order.city}, ${order.governorate}`)
+  if (order.additional_info) line(`Additional info: ${order.additional_info}`)
+
+  return pdf.save()
+}
+
 Deno.serve(async (req: Request) => {
   if (req.method === 'OPTIONS') return new Response('ok', { headers: corsHeaders })
 
   try {
     if (req.method !== 'POST') return json({ error: 'Méthode non autorisée' }, 405)
 
+    const emailJsServiceId = Deno.env.get('EMAILJS_SERVICE_ID')
+    const emailJsTemplateId = Deno.env.get('EMAILJS_TEMPLATE_ID')
+    const emailJsPublicKey = Deno.env.get('EMAILJS_PUBLIC_KEY')
+    const emailJsPrivateKey = Deno.env.get('EMAILJS_PRIVATE_KEY')
+    const hasAnyEmailJsSetting = Boolean(
+      emailJsServiceId || emailJsTemplateId || emailJsPublicKey || emailJsPrivateKey,
+    )
+    const hasEmailJs = Boolean(
+      emailJsServiceId && emailJsTemplateId && emailJsPublicKey && emailJsPrivateKey,
+    )
     const hasResend = Boolean(Deno.env.get('RESEND_API_KEY'))
     const hasSmtp = Boolean(Deno.env.get('SMTP_PASS'))
-    if (!hasResend && !hasSmtp) {
+    if (hasAnyEmailJsSetting && !hasEmailJs) {
+      return json(
+        {
+          sent: false,
+          error:
+            'EmailJS est sélectionné mais sa configuration est incomplète. Configurez EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, EMAILJS_PUBLIC_KEY et EMAILJS_PRIVATE_KEY.',
+        },
+        501,
+      )
+    }
+    if (!hasEmailJs && !hasResend && !hasSmtp) {
       return json(
         {
           sent: false,
@@ -94,7 +218,9 @@ Deno.serve(async (req: Request) => {
 
     // Precedence: ORDER_TO secret, then the Admin -> Settings value, then the
     // built-in store address, so orders are never silently dropped.
-    const to = Deno.env.get('ORDER_TO') || settings?.contact_email || STORE_ADMIN_EMAIL
+    const configuredRecipients = Deno.env.get('ORDER_TO') || settings?.contact_email || STORE_ADMIN_EMAIL
+    const to = [...new Set(configuredRecipients.split(/[,\n;]/).map((email) => email.trim()).filter(Boolean))]
+    if (!to.length) to.push(STORE_ADMIN_EMAIL)
 
     const rows = (items ?? [])
       .map(
@@ -172,6 +298,106 @@ Deno.serve(async (req: Request) => {
 
     const subject = `Nouvelle commande ${order.order_number} — ${order.customer_name} — ${money(order.total)}`
 
+    if (hasEmailJs) {
+      const invoicePdf = await createOrderPdf(order, (items ?? []) as Record<string, unknown>[])
+      const pdfPath = `orders/${order.id}.pdf`
+      const { error: uploadError } = await admin.storage
+        .from('order-pdfs')
+        .upload(pdfPath, invoicePdf, {
+          contentType: 'application/pdf',
+          upsert: true,
+        })
+
+      if (uploadError) {
+        console.error('order PDF upload failed', uploadError.message)
+        return json({ sent: false, error: "Impossible de préparer le PDF de la commande" }, 500)
+      }
+
+      const { data: signedPdf, error: signedUrlError } = await admin.storage
+        .from('order-pdfs')
+        .createSignedUrl(pdfPath, 60 * 60 * 24 * 7, {
+          download: `COBRA-TN-Commande-${order.order_number}.pdf`,
+        })
+
+      if (signedUrlError || !signedPdf) {
+        console.error('order PDF link creation failed', signedUrlError?.message)
+        return json({ sent: false, error: "Impossible de créer le lien de téléchargement du PDF" }, 500)
+      }
+
+      const orderPdfUrl = new URL(signedPdf.signedUrl, `${Deno.env.get('SUPABASE_URL')}/`).toString()
+      const orderSummary = [
+        `Nouvelle commande ${order.order_number}`,
+        `Date : ${new Date(order.created_at).toUTCString()}`,
+        '',
+        ...(items ?? []).map(
+          (item: Record<string, unknown>) =>
+            `- ${item.product_name} | ${[item.color, item.size].filter(Boolean).join(' / ') || 'Taille unique'} | x${item.quantity} | ${money(item.total_price)}`,
+        ),
+        '',
+        `Sous-total : ${money(order.subtotal)}`,
+        ...(Number(order.discount) > 0 ? [`Remise : ${money(order.discount)}`] : []),
+        `Livraison : ${money(order.shipping_cost)}`,
+        `Total : ${money(order.total)}`,
+        '',
+        `Client : ${order.customer_name}`,
+        `Téléphone : ${order.phone}`,
+        ...(order.customer_email ? [`Email : ${order.customer_email}`] : []),
+        `Adresse : ${order.address}, ${order.city}, ${order.governorate}`,
+        ...(order.additional_info ? [`Remarques : ${order.additional_info}`] : []),
+      ].join('\n')
+
+      for (const [index, recipient] of to.entries()) {
+        const response = await fetch('https://api.emailjs.com/api/v1.0/email/send', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            service_id: emailJsServiceId,
+            template_id: emailJsTemplateId,
+            user_id: emailJsPublicKey,
+            accessToken: emailJsPrivateKey,
+            template_params: {
+              to_email: recipient,
+              subject,
+              order_summary: orderSummary,
+              order_id: order.order_number,
+              order_date: new Date(order.created_at).toUTCString(),
+              orders: (items ?? []).map((item: Record<string, unknown>) => ({
+                name: item.product_name,
+                units: item.quantity,
+                price: money(item.unit_price),
+                line_total: money(item.total_price),
+                image: item.image_url || '',
+              })),
+              cost: {
+                subtotal: money(order.subtotal),
+                shipping: money(order.shipping_cost),
+                tax: money(0),
+                discount: money(order.discount),
+                total: money(order.total),
+              },
+              customer_name: order.customer_name,
+              customer_email: order.customer_email,
+              customer_phone: order.phone,
+              customer_address: `${order.address}, ${order.city}, ${order.governorate}`,
+              additional_info: order.additional_info || '',
+              order_pdf_url: orderPdfUrl,
+            },
+          }),
+        })
+
+        if (!response.ok) {
+          console.error('emailjs failed', response.status)
+          return json({ sent: false, error: "Le fournisseur d'emails a rejeté le message" }, 502)
+        }
+
+        if (index < to.length - 1) {
+          await new Promise((resolve) => setTimeout(resolve, 1100))
+        }
+      }
+
+      return json({ sent: true, to, transport: 'emailjs' })
+    }
+
     const resendKey = Deno.env.get('RESEND_API_KEY')
     if (resendKey) {
       // Resend's free tier only allows the shared onboarding@resend.dev sender,
@@ -186,7 +412,7 @@ Deno.serve(async (req: Request) => {
           Authorization: `Bearer ${resendKey}`,
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ from, to: [to], subject, html, text }),
+        body: JSON.stringify({ from, to, subject, html, text }),
       })
       if (!res.ok) {
         const detail = await res.text().catch(() => '')
@@ -211,7 +437,7 @@ Deno.serve(async (req: Request) => {
 
     const res = await transport.sendMail({
       from: `"COBRA TN" <${smtpUser}>`,
-      to: [to],
+      to,
       subject,
       html,
       text,

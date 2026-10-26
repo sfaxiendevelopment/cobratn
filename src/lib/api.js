@@ -473,7 +473,7 @@ export async function subscribeNewsletter(email) {
   return true
 }
 
-const EMPTY_SETTINGS = { about_text: '', contact_email: '', contact_phone: '', social: {} }
+const EMPTY_SETTINGS = { about_text: '', contact_email: '', social: {} }
 
 /**
  * Public read of the site settings. `admin_settings` has a `using (true)`

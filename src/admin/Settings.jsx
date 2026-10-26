@@ -6,7 +6,7 @@ import { useUI } from '../contexts/UIContext'
 import { useDocumentMeta } from '../hooks/useDocumentMeta'
 import { getErrorMessage } from '../lib/utils'
 
-const EMPTY = { about_text: '', contact_email: '', contact_phone: '', social: { instagram: '', tiktok: '', facebook: '' } }
+const EMPTY = { about_text: '', contact_email: '', social: { instagram: '', tiktok: '', facebook: '' } }
 
 /**
  * Only the three networks the storefront actually renders. YouTube was dropped
@@ -44,7 +44,6 @@ export default function Settings() {
       setForm({
         about_text: s.about_text || '',
         contact_email: s.contact_email || '',
-        contact_phone: s.contact_phone || '',
         social: pickSocial(s.social),
       })
       setLoading(false)
@@ -88,10 +87,14 @@ export default function Settings() {
                 <textarea rows={5} className={`${adminInput} h-auto py-3`} value={form.about_text} onChange={(e) => setForm({ ...form, about_text: e.target.value })} placeholder="L'histoire derrière COBRA TN…" />
               </Field>
               <Field label="Email de contact">
-                <input className={adminInput} value={form.contact_email} onChange={(e) => setForm({ ...form, contact_email: e.target.value })} placeholder="cobratn0@gmail.com" />
-              </Field>
-              <Field label="Téléphone de contact">
-                <input className={adminInput} value={form.contact_phone} onChange={(e) => setForm({ ...form, contact_phone: e.target.value })} placeholder="+216 20 000 000" />
+                <textarea
+                  rows={3}
+                  className={`${adminInput} h-auto py-3`}
+                  value={form.contact_email}
+                  onChange={(e) => setForm({ ...form, contact_email: e.target.value })}
+                  placeholder="cobratn0@gmail.com, bahrimohsen26@gmail.com, mostfalahyeni@gmail.com"
+                />
+                <p className="mt-2 text-[11px] text-neutral-500">Séparez plusieurs adresses par une virgule ou un retour à la ligne.</p>
               </Field>
             </div>
           </AdminCard>

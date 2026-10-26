@@ -11,8 +11,7 @@ export const SOCIAL_FALLBACKS = {
 export const SOCIAL_ORDER = ['instagram', 'tiktok', 'facebook']
 
 const CONTACT_FALLBACKS = {
-  contact_email: 'cobratn0@gmail.com',
-  contact_phone: '+216 20 000 000',
+  contact_email: 'cobratn0@gmail.com, bahrimohsen26@gmail.com, mostfalahyeni@gmail.com',
 }
 
 const FALLBACKS = {
@@ -63,7 +62,7 @@ function load() {
 
 /**
  * The single source of truth for everything an admin edits under Paramètres:
- * the three social links, the contact email and the contact phone number.
+ * the three social links and contact email addresses.
  * The home page, footer, About and Contact pages all read from this, so the
  * same values can never drift apart between pages.
  */

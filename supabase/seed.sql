@@ -6,12 +6,11 @@
 -- ============================================================================
 
 -- --- Admin settings -----------------------------------------------------------
-insert into public.admin_settings (id, about_text, contact_email, contact_phone, social)
+insert into public.admin_settings (id, about_text, contact_email, social)
 values (
   '11111111-1111-1111-1111-111111111111',
   'COBRA TN was born on the streets of Tunis. More than clothes, it''s a mindset. Every piece is built for people who move with purpose — premium monochrome streetwear with an identity you can feel.',
-  'cobratn0@gmail.com',
-  '+216 20 000 000',
+  'cobratn0@gmail.com, bahrimohsen26@gmail.com, mostfalahyeni@gmail.com',
   '{"instagram": "https://instagram.com/cobra.tn", "tiktok": "https://tiktok.com/@cobra.tn", "youtube": "https://youtube.com/@cobra.tn", "x": "https://x.com/cobra_tn"}'::jsonb
 )
 on conflict (id) do nothing;

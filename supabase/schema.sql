@@ -213,7 +213,6 @@ create table if not exists public.admin_settings (
   id uuid primary key default gen_random_uuid(),
   about_text text default '',
   contact_email text default '',
-  contact_phone text default '',
   social jsonb default '{"instagram": "", "tiktok": "", "facebook": ""}'::jsonb,
   updated_at timestamptz not null default now()
 );
