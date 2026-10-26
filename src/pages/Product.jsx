@@ -101,6 +101,7 @@ export default function ProductPage() {
   const colors = [...new Set(variants.map((v) => v.color).filter(Boolean))]
   const activeColor = color || colors[0] || null
   const colorVariants = variants.filter((v) => (v.color || null) === activeColor)
+  const activeColorName = colorName(activeColor, colorVariants[0]?.color_name)
   const sizes = [...new Set(colorVariants.map((v) => v.size).filter(Boolean))]
   const activeSize = size || (sizes.includes('M') ? 'M' : sizes[0])
   const variant =
@@ -117,9 +118,9 @@ export default function ProductPage() {
     ? 'Cette pièce est actuellement indisponible.'
     : !stocked
       ? variant.size
-        ? `La taille ${variant.size} est épuisée en ${variant.color}.`
+        ? `La taille ${variant.size} est épuisée en ${colorName(variant.color, variant.color_name)}.`
         : variant.color
-          ? `${variant.color} est épuisé.`
+          ? `${colorName(variant.color, variant.color_name)} est épuisé.`
           : 'Cette pièce est actuellement épuisée.'
       : ''
 
@@ -247,22 +248,23 @@ export default function ProductPage() {
 
           <div className="mt-8">
             <div className="mb-2 flex items-center justify-between">
-              <span className="label">Couleur — <span className="normal-case tracking-normal text-neutral-600">{activeColor ? colorName(activeColor) : 'Une seule couleur'}</span></span>
+              <span className="label">Couleur — <span className="normal-case tracking-normal text-neutral-600">{activeColor ? activeColorName : 'Une seule couleur'}</span></span>
             </div>
             <div className="flex flex-wrap gap-2.5">
               {colors.length ? (
                 colors.map((c) => {
                   const soldOut = !variants.some((v) => (v.color || null) === c && v.available)
+                  const label = colorName(c, variants.find((v) => v.color === c)?.color_name)
                   return (
                     <button
                       key={c}
                       type="button"
                       onClick={() => { setColor(c); setSize(null); setAddError('') }}
-                      aria-label={`Couleur ${colorName(c)}${soldOut ? ' (épuisée)' : ''}`}
+                      aria-label={`Couleur ${label}${soldOut ? ' (épuisée)' : ''}`}
                       aria-pressed={activeColor === c}
                       className={cn(
-                        'h-8 w-8 rounded-full border transition-all',
-                        activeColor === c ? 'border-black ring-2 ring-black ring-offset-2' : 'border-black/20 hover:border-black',
+                        'h-8 w-8 rounded-full border-2 transition-all',
+                        activeColor === c ? 'border-black ring-2 ring-black ring-offset-2' : 'border-neutral-500 hover:border-black',
                         soldOut && 'cursor-not-allowed opacity-30',
                       )}
                       style={{ background: swatchFor(c) }}

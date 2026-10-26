@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { useDocumentMeta } from '../hooks/useDocumentMeta'
-import { formatPrice, formatDateTime } from '../lib/utils'
+import { formatPrice, formatDateTime, colorName } from '../lib/utils'
 import { IconCheck, IconMail, IconTruck, IconHome } from '../components/icons'
 
 /**
@@ -107,7 +107,7 @@ export default function OrderSuccess() {
                 <div className="min-w-0 flex-1 text-xs">
                   <p className="font-semibold uppercase">{item.product_name}</p>
                   <p className="mt-0.5 text-neutral-500">
-                    {[item.color, item.size].filter(Boolean).join(' / ') || 'Taille unique'}
+                    {[colorName(item.color), item.size].filter(Boolean).join(' / ') || 'Taille unique'}
                   </p>
                   <p className="mt-1 text-neutral-500">Quantité : {item.quantity}</p>
                 </div>

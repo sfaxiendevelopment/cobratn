@@ -13,7 +13,7 @@ import {
 } from '../lib/api'
 import { useUI } from '../contexts/UIContext'
 import { useDocumentMeta } from '../hooks/useDocumentMeta'
-import { slugify, formatPrice, getErrorMessage, SIZES, hexFor } from '../lib/utils'
+import { slugify, formatPrice, getErrorMessage, SIZES, hexFor, colorName } from '../lib/utils'
 import { IconChevronLeft, IconChevronRight, IconPlus, IconX } from '../components/icons'
 import { ProductPageSkeleton } from '../components/LoadingSkeleton'
 
@@ -94,7 +94,7 @@ export default function ProductForm() {
       setCollections(cols)
 
       if (!isEdit) {
-        setVariants([{ key: nextKey(), id: null, color: '#000000', size: '', sku: '', stock: '0', price: '' }])
+        setVariants([{ key: nextKey(), id: null, color: '#000000', color_name: 'Noir', size: '', sku: '', stock: '0', price: '' }])
         return
       }
 
@@ -129,12 +129,13 @@ export default function ProductForm() {
                 key: nextKey(),
                 id: v.id,
                 color: v.color || '',
+                color_name: v.color_name || colorName(v.color),
                 size: v.size || '',
                 sku: v.sku || '',
                 stock: String(v.stock ?? 0),
                 price: v.price == null ? '' : String(v.price),
               }))
-            : [{ key: nextKey(), id: null, color: '#000000', size: '', sku: '', stock: '0', price: '' }],
+            : [{ key: nextKey(), id: null, color: '#000000', color_name: 'Noir', size: '', sku: '', stock: '0', price: '' }],
         )
         setImages(
           (product.images || []).map((img) => ({
@@ -179,7 +180,16 @@ export default function ProductForm() {
         (v) => String(v.color || '').trim() === color && String(v.size || '').trim() === String(size).trim(),
       )
         ? prev
-        : [...prev, { key: nextKey(), id: null, color, size: String(size).trim(), sku: '', stock: '0', price: '' }],
+        : [...prev, {
+            key: nextKey(),
+            id: null,
+            color,
+            color_name: prev.find((v) => String(v.color || '').trim() === color)?.color_name || colorName(color),
+            size: String(size).trim(),
+            sku: '',
+            stock: '0',
+            price: '',
+          }],
     )
 
   const toggleSize = (color, size) => {
@@ -201,13 +211,22 @@ export default function ProductForm() {
     if (!color) continue
     const existing = colorGroups.find((g) => g.color === color)
     if (existing) existing.rows.push(row)
-    else colorGroups.push({ id: row.key, color, rows: [row] })
+    else colorGroups.push({ id: row.key, color, color_name: row.color_name || colorName(color), rows: [row] })
   }
 
   const addRowToColor = (color) =>
     setVariants((prev) => [
       ...prev,
-      { key: nextKey(), id: null, color, size: '', sku: '', stock: '0', price: '' },
+      {
+        key: nextKey(),
+        id: null,
+        color,
+        color_name: prev.find((v) => String(v.color || '').trim() === color)?.color_name || colorName(color),
+        size: '',
+        sku: '',
+        stock: '0',
+        price: '',
+      },
     ])
 
   const addColor = () => {
@@ -221,7 +240,20 @@ export default function ProductForm() {
 
   const setColorValue = (from, hex) =>
     setVariants((prev) =>
-      prev.map((v) => (String(v.color || '').trim() === from ? { ...v, color: hex } : v)),
+      prev.map((v) => {
+        if (String(v.color || '').trim() !== from) return v
+        const previousDefaultName = colorName(from)
+        return {
+          ...v,
+          color: hex,
+          color_name: v.color_name === previousDefaultName ? colorName(hex) : v.color_name,
+        }
+      }),
+    )
+
+  const setColorName = (color, color_name) =>
+    setVariants((prev) =>
+      prev.map((v) => (String(v.color || '').trim() === color ? { ...v, color_name } : v)),
     )
 
   const removeColor = (color) =>
@@ -279,6 +311,10 @@ export default function ProductForm() {
       setError('Le nom du produit est obligatoire.')
       return
     }
+    if (variants.some((v) => String(v.size || '').trim() && !String(v.color_name || '').trim())) {
+      setError('Veuillez saisir un nom pour chaque couleur utilisée.')
+      return
+    }
 
     const slug = form.slug.trim() ? slugify(form.slug) : ''
 
@@ -311,6 +347,7 @@ export default function ProductForm() {
         .map((v) => ({
           id: v.id || undefined,
           color: String(v.color || '').trim() || '#000000',
+          color_name: String(v.color_name || '').trim(),
           size: String(v.size).trim(),
           sku: String(v.sku || '').trim() || null,
           stock: Number(v.stock) || 0,
@@ -553,12 +590,12 @@ export default function ProductForm() {
             </p>
 
             <div className="space-y-4">
-              {colorGroups.map(({ id, color, rows: groupRows }) => {
+              {colorGroups.map(({ id, color, color_name, rows: groupRows }) => {
                 const swatch = hexFor(color)
                 return (
                   <div key={id} className="border border-neutral-800 p-4">
                     <div className="mb-3 flex flex-wrap items-center justify-between gap-3">
-                      <Field label="Couleur" className="mb-0 w-64">
+                      <Field label="Nuancier" className="mb-0 w-64">
                         <div className="flex items-center gap-2">
                           <input
                             type="color"
@@ -567,8 +604,18 @@ export default function ProductForm() {
                             aria-label={`Couleur ${swatch}`}
                             className="h-9 w-14 shrink-0 cursor-pointer border border-neutral-700 bg-white p-1"
                           />
+                          <span className="h-8 w-8 rounded-full border-2 border-neutral-400" style={{ backgroundColor: swatch }} />
                           <span className="font-mono text-xs uppercase text-white">{swatch}</span>
                         </div>
+                      </Field>
+                      <Field label="Nom affiché (ex. Blanc, Noir)" className="mb-0 min-w-52 flex-1">
+                        <input
+                          className={adminInput}
+                          value={color_name}
+                          onChange={(e) => setColorName(color, e.target.value)}
+                          placeholder="Saisir le nom de la couleur"
+                          required
+                        />
                       </Field>
                       <button
                         type="button"
@@ -665,7 +712,7 @@ export default function ProductForm() {
                       onClick={() => addRowToColor(color)}
                       className="mt-2 text-[10px] font-bold uppercase tracking-widest text-neutral-400 hover:text-white"
                     >
-                      + Ajouter une taille personnalisée à {swatch}
+                      + Ajouter une taille personnalisée à {color_name || swatch}
                     </button>
                   </div>
                 )

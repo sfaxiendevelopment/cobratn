@@ -426,7 +426,7 @@ function FilterPanel({
               )}
             >
               <span
-                className="h-3 w-3 rounded-full border border-black/20"
+                className="h-3 w-3 rounded-full border-2 border-neutral-500"
                 style={{ background: swatchFor(c) }}
               />
               {colorName(c)}

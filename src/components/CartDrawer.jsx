@@ -90,7 +90,7 @@ export default function CartDrawer() {
                         </button>
                       </div>
                       <p className="mt-1 text-[11px] text-neutral-500">
-                        {item.variant?.color || item.color || ''} {item.variant?.size || item.size ? ` / ${item.variant?.size || item.size}` : ''}
+                        {item.color || ''} {item.variant?.size || item.size ? ` / ${item.variant?.size || item.size}` : ''}
                       </p>
                       <div className="mt-auto flex items-center justify-between pt-2">
                         <div className="flex items-center border border-black/15">

@@ -69,16 +69,39 @@ export function getInitials(name = '') {
 
 export const SIZES = ['S', 'M', 'L', 'XL', 'XXL']
 
-export const COLORS = ['Black', 'White', 'Gray', 'Green', 'Beige', 'Bordeaux']
+export const COLORS = ['Noir', 'Blanc', 'Gris', 'Vert', 'Beige', 'Bordeaux']
 
 const SWATCH_HEX = {
   black: '#000000',
+  noir: '#000000',
   white: '#ffffff',
+  blanc: '#ffffff',
   grey: '#9ca3af',
   gray: '#9ca3af',
+  gris: '#9ca3af',
+  charcoal: '#1f2937',
+  anthracite: '#1f2937',
+  'off white': '#f5f5f4',
+  'blanc cassé': '#f5f5f4',
   green: '#2e7d32',
+  vert: '#2e7d32',
   beige: '#e8d8b8',
   bordeaux: '#800020',
+  olive: '#a16207',
+  teal: '#0f766e',
+  turquoise: '#0f766e',
+  navy: '#1e3a8a',
+  'bleu marine': '#1e3a8a',
+  blue: '#2563eb',
+  bleu: '#2563eb',
+  purple: '#7c3aed',
+  violet: '#7c3aed',
+  pink: '#ec4899',
+  rose: '#ec4899',
+  red: '#e11d48',
+  rouge: '#e11d48',
+  brown: '#78350f',
+  marron: '#78350f',
 }
 
 export function swatchFor(color) {
@@ -103,25 +126,44 @@ export function hexFor(color) {
  * turn that code back into a name the shopper recognises.
  */
 const NAMED_COLORS = [
-  ['#000000', 'Black'],
-  ['#1f2937', 'Charcoal'],
-  ['#808080', 'Gray'],
-  ['#9ca3af', 'Gray'],
-  ['#ffffff', 'White'],
-  ['#f5f5f4', 'Off White'],
+  ['#000000', 'Noir'],
+  ['#1f2937', 'Anthracite'],
+  ['#808080', 'Gris'],
+  ['#9ca3af', 'Gris'],
+  ['#ffffff', 'Blanc'],
+  ['#f5f5f4', 'Blanc cassé'],
   ['#e8d8b8', 'Beige'],
   ['#a16207', 'Olive'],
-  ['#2e7d32', 'Green'],
-  ['#0f766e', 'Teal'],
-  ['#1e3a8a', 'Navy'],
-  ['#2563eb', 'Blue'],
-  ['#7c3aed', 'Purple'],
-  ['#ec4899', 'Pink'],
-  ['#e11d48', 'Red'],
+  ['#2e7d32', 'Vert'],
+  ['#0f766e', 'Turquoise'],
+  ['#1e3a8a', 'Bleu marine'],
+  ['#2563eb', 'Bleu'],
+  ['#7c3aed', 'Violet'],
+  ['#ec4899', 'Rose'],
+  ['#e11d48', 'Rouge'],
   ['#800020', 'Bordeaux'],
   ['#7f1d1d', 'Bordeaux'],
-  ['#78350f', 'Brown'],
+  ['#78350f', 'Marron'],
 ]
+
+const COLOR_NAME_TRANSLATIONS = {
+  black: 'Noir',
+  white: 'Blanc',
+  gray: 'Gris',
+  grey: 'Gris',
+  charcoal: 'Anthracite',
+  'off white': 'Blanc cassé',
+  green: 'Vert',
+  teal: 'Turquoise',
+  navy: 'Bleu marine',
+  blue: 'Bleu',
+  purple: 'Violet',
+  pink: 'Rose',
+  red: 'Rouge',
+  brown: 'Marron',
+  orange: 'Orange',
+  yellow: 'Jaune',
+}
 
 /** Normalises `#abc` to `#aabbcc`, or returns null when it is not a hex. */
 function normalizeHex(color) {
@@ -157,30 +199,34 @@ function genericColorName(hex) {
   // A barely-tinted shade reads better as a neutral than as a faint hue,
   // so near-greys are named by lightness instead.
   if (saturation < 0.18) {
-    if (lightness > 0.92) return 'White'
-    if (lightness > 0.78) return 'Off White'
-    if (lightness < 0.08) return 'Black'
-    if (lightness < 0.25) return 'Charcoal'
-    return 'Gray'
+    if (lightness > 0.92) return 'Blanc'
+    if (lightness > 0.78) return 'Blanc cassé'
+    if (lightness < 0.08) return 'Noir'
+    if (lightness < 0.25) return 'Anthracite'
+    return 'Gris'
   }
   if (saturation < 0.32 && lightness > 0.6 && hue >= 20 && hue < 70) return 'Beige'
-  if (hue < 15 || hue >= 345) return 'Red'
+  if (hue < 15 || hue >= 345) return 'Rouge'
   if (hue < 45) return 'Orange'
-  if (hue < 70) return 'Yellow'
-  if (hue < 160) return 'Green'
-  if (hue < 200) return 'Teal'
-  if (hue < 255) return 'Blue'
-  if (hue < 290) return 'Purple'
-  return 'Pink'
+  if (hue < 70) return 'Jaune'
+  if (hue < 160) return 'Vert'
+  if (hue < 200) return 'Turquoise'
+  if (hue < 255) return 'Bleu'
+  if (hue < 290) return 'Violet'
+  return 'Rose'
 }
 
-/** A shopper-facing name for a stored colour: `Black`, `Beige`, `Navy`… */
-export function colorName(color) {
+/** A shopper-facing French label for a stored colour or its hex value. */
+export function colorName(color, savedName) {
+  const explicitName = String(savedName || '').trim()
+  if (explicitName) return explicitName
   const raw = String(color || '').trim()
   if (!raw) return ''
   const hex = normalizeHex(raw)
-  // A legacy name such as `Black` is already readable.
-  if (!hex) return raw.charAt(0).toUpperCase() + raw.slice(1)
+  if (!hex) {
+    const normalisedName = raw.toLowerCase()
+    return COLOR_NAME_TRANSLATIONS[normalisedName] || raw.charAt(0).toUpperCase() + raw.slice(1)
+  }
 
   const exact = NAMED_COLORS.find(([reference]) => reference === hex)
   return exact ? exact[1] : genericColorName(hex)

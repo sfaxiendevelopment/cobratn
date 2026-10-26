@@ -44,6 +44,35 @@ const json = (body: unknown, status = 200) =>
 
 const money = (value: unknown) => `${Number(value ?? 0).toFixed(2)} TND`
 
+const orderColorName = (value: unknown) => {
+  const raw = String(value ?? '').trim()
+  const names: Record<string, string> = {
+    '#000000': 'Noir',
+    black: 'Noir',
+    '#ffffff': 'Blanc',
+    white: 'Blanc',
+    '#f5f5f4': 'Blanc cassé',
+    '#808080': 'Gris',
+    '#9ca3af': 'Gris',
+    gray: 'Gris',
+    grey: 'Gris',
+    '#1f2937': 'Anthracite',
+    '#7f1d1d': 'Bordeaux',
+    '#800020': 'Bordeaux',
+    '#14532d': 'Vert',
+    '#2e7d32': 'Vert',
+    green: 'Vert',
+    '#1e3a8a': 'Bleu marine',
+    '#2563eb': 'Bleu',
+    '#78350f': 'Marron',
+    '#e11d48': 'Rouge',
+    '#0f766e': 'Turquoise',
+    '#a16207': 'Olive',
+    '#e8d8b8': 'Beige',
+  }
+  return names[raw.toLowerCase()] || (raw.startsWith('#') ? 'Couleur personnalisée' : raw)
+}
+
 const esc = (value: unknown) =>
   String(value ?? '')
     .replace(/&/g, '&amp;')
@@ -53,9 +82,10 @@ const esc = (value: unknown) =>
 
 const pdfText = (value: unknown) =>
   String(value ?? '')
-    .normalize('NFKD')
-    .replace(/[\u0300-\u036f]/g, '')
-    .replace(/[^\x20-\x7E]/g, '?')
+    .normalize('NFC')
+    .replace(/[’‘]/g, "'")
+    .replace(/[–—]/g, '-')
+    .replace(/[^\x20-\x7E\u00A0-\u00FF]/g, '?')
 
 async function createOrderPdf(order: Record<string, unknown>, items: Record<string, unknown>[]) {
   const { PDFDocument, StandardFonts, rgb } = await import('npm:pdf-lib@1.17.1')
@@ -65,17 +95,57 @@ async function createOrderPdf(order: Record<string, unknown>, items: Record<stri
   const pageSize: [number, number] = [595.28, 841.89]
   const margin = 46
   const maxWidth = pageSize[0] - margin * 2
+  const ink = rgb(0.07, 0.07, 0.07)
+  const muted = rgb(0.38, 0.38, 0.38)
+  const light = rgb(0.95, 0.95, 0.95)
   let page = pdf.addPage(pageSize)
-  let cursor = 52
+  let cursor = 136
+
+  const drawHeader = (continued = false) => {
+    if (continued) page = pdf.addPage(pageSize)
+    page.drawRectangle({
+      x: 0,
+      y: pageSize[1] - 112,
+      width: pageSize[0],
+      height: 112,
+      color: ink,
+    })
+    page.drawText('COBRA TN', {
+      x: margin,
+      y: pageSize[1] - 43,
+      size: 11,
+      font: bold,
+      color: rgb(0.72, 0.72, 0.72),
+    })
+    page.drawText(continued ? 'COMMANDE - SUITE' : 'NOUVELLE COMMANDE', {
+      x: margin,
+      y: pageSize[1] - 76,
+      size: continued ? 16 : 22,
+      font: bold,
+      color: rgb(1, 1, 1),
+    })
+    if (!continued) {
+      page.drawText(`#${pdfText(order.order_number)}`, {
+        x: margin,
+        y: pageSize[1] - 98,
+        size: 10,
+        font: regular,
+        color: rgb(0.85, 0.85, 0.85),
+      })
+    }
+    cursor = 136
+  }
 
   const addPageIfNeeded = (height: number) => {
     if (cursor + height > pageSize[1] - margin) {
-      page = pdf.addPage(pageSize)
-      cursor = 52
+      drawHeader(true)
     }
   }
 
-  const line = (value: unknown, options: { size?: number; strong?: boolean; gap?: number } = {}) => {
+  const line = (
+    value: unknown,
+    options: { size?: number; strong?: boolean; gap?: number; color?: ReturnType<typeof rgb> } = {},
+  ) => {
     const size = options.size ?? 10
     const font = options.strong ? bold : regular
     const words = pdfText(value).split(/\s+/)
@@ -100,7 +170,7 @@ async function createOrderPdf(order: Record<string, unknown>, items: Record<stri
         y: pageSize[1] - cursor - size,
         size,
         font,
-        color: rgb(0.08, 0.08, 0.08),
+        color: options.color ?? ink,
       })
       cursor += size + 6
     }
@@ -113,39 +183,121 @@ async function createOrderPdf(order: Record<string, unknown>, items: Record<stri
       start: { x: margin, y: pageSize[1] - cursor },
       end: { x: pageSize[0] - margin, y: pageSize[1] - cursor },
       thickness: 0.8,
-      color: rgb(0.75, 0.75, 0.75),
+      color: rgb(0.82, 0.82, 0.82),
     })
-    cursor += 12
+    cursor += 15
   }
 
-  line('COBRA TN', { size: 11, strong: true })
-  line('ORDER DETAILS', { size: 22, strong: true, gap: 4 })
-  line(`Order #${order.order_number}`)
-  line(`Date: ${new Date(String(order.created_at)).toUTCString()}`)
-  cursor += 6
+  const drawPair = (label: string, value: unknown) => {
+    addPageIfNeeded(20)
+    const size = 10
+    const renderedValue = pdfText(value)
+    page.drawText(label, {
+      x: margin,
+      y: pageSize[1] - cursor - size,
+      size,
+      font: regular,
+      color: muted,
+    })
+    page.drawText(renderedValue, {
+      x: pageSize[0] - margin - bold.widthOfTextAtSize(renderedValue, size),
+      y: pageSize[1] - cursor - size,
+      size,
+      font: bold,
+      color: ink,
+    })
+    cursor += 20
+  }
+
+  drawHeader()
+  line(`Date : ${new Date(String(order.created_at)).toLocaleString('fr-FR', { timeZone: 'UTC' })} UTC`, {
+    size: 9,
+    color: muted,
+    gap: 10,
+  })
   divider()
-  line('ITEMS', { size: 13, strong: true, gap: 4 })
+  line('ARTICLES COMMANDÉS', { size: 13, strong: true, gap: 8 })
   for (const item of items) {
-    line(`${item.product_name} | ${[item.color, item.size].filter(Boolean).join(' / ') || 'One size'}`, {
-      strong: true,
+    const itemName = pdfText(item.product_name)
+    const details = `${[orderColorName(item.color), item.size].filter(Boolean).join(' / ') || 'Taille unique'}  |  Quantité : ${item.quantity}  |  Prix unitaire : ${money(item.unit_price)}`
+    const rowHeight = 46
+    addPageIfNeeded(rowHeight + 8)
+    page.drawRectangle({
+      x: margin,
+      y: pageSize[1] - cursor - rowHeight,
+      width: maxWidth,
+      height: rowHeight,
+      color: light,
     })
-    line(`Quantity: ${item.quantity} | Unit price: ${money(item.unit_price)} | Line total: ${money(item.total_price)}`, {
-      gap: 4,
+    page.drawText(itemName, {
+      x: margin + 12,
+      y: pageSize[1] - cursor - 18,
+      size: 10,
+      font: bold,
+      color: ink,
     })
+    page.drawText(pdfText(details), {
+      x: margin + 12,
+      y: pageSize[1] - cursor - 34,
+      size: 8,
+      font: regular,
+      color: muted,
+    })
+    const total = money(item.total_price)
+    page.drawText(total, {
+      x: pageSize[0] - margin - 12 - bold.widthOfTextAtSize(total, 9),
+      y: pageSize[1] - cursor - 18,
+      size: 9,
+      font: bold,
+      color: ink,
+    })
+    cursor += rowHeight + 8
   }
   divider()
-  line(`Subtotal: ${money(order.subtotal)}`)
-  if (Number(order.discount) > 0) line(`Discount: ${money(order.discount)}`)
-  line(`Shipping: ${money(order.shipping_cost)}`)
-  line('Tax: 0.00 TND')
-  line(`TOTAL: ${money(order.total)}`, { size: 13, strong: true, gap: 4 })
+  line('RÉCAPITULATIF', { size: 13, strong: true, gap: 6 })
+  drawPair('Sous-total', money(order.subtotal))
+  if (Number(order.discount) > 0) drawPair('Remise', `- ${money(order.discount)}`)
+  drawPair('Livraison', money(order.shipping_cost))
+  drawPair('Taxes', money(0))
+  addPageIfNeeded(32)
+  page.drawRectangle({
+    x: margin,
+    y: pageSize[1] - cursor - 30,
+    width: maxWidth,
+    height: 30,
+    color: ink,
+  })
+  page.drawText('TOTAL À LA LIVRAISON', {
+    x: margin + 10,
+    y: pageSize[1] - cursor - 20,
+    size: 10,
+    font: bold,
+    color: rgb(1, 1, 1),
+  })
+  const orderTotal = money(order.total)
+  page.drawText(orderTotal, {
+    x: pageSize[0] - margin - 10 - bold.widthOfTextAtSize(orderTotal, 11),
+    y: pageSize[1] - cursor - 21,
+    size: 11,
+    font: bold,
+    color: rgb(1, 1, 1),
+  })
+  cursor += 42
   divider()
-  line('CUSTOMER AND DELIVERY', { size: 13, strong: true, gap: 4 })
-  line(`Name: ${order.customer_name}`)
-  line(`Email: ${order.customer_email}`)
-  line(`Phone: ${order.phone}`)
-  line(`Address: ${order.address}, ${order.city}, ${order.governorate}`)
-  if (order.additional_info) line(`Additional info: ${order.additional_info}`)
+  line('CLIENT ET LIVRAISON', { size: 13, strong: true, gap: 6 })
+  line(`Nom : ${order.customer_name}`)
+  line(`Email : ${order.customer_email}`)
+  line(`Téléphone : ${order.phone}`)
+  line(`Adresse : ${order.address}, ${order.city}, ${order.governorate}`)
+  if (order.additional_info) line(`Informations supplémentaires : ${order.additional_info}`)
+  addPageIfNeeded(34)
+  page.drawText('Notification destinée à l’équipe COBRA TN. Prix indiqués en TND.', {
+    x: margin,
+    y: pageSize[1] - cursor - 22,
+    size: 8,
+    font: regular,
+    color: muted,
+  })
 
   return pdf.save()
 }
@@ -229,7 +381,7 @@ Deno.serve(async (req: Request) => {
           <td style="padding:10px 12px;border-bottom:1px solid #e5e5e5;">
             <strong>${esc(item.product_name)}</strong><br />
             <span style="color:#666;font-size:12px;">
-              ${[item.color, item.size].filter(Boolean).map(esc).join(' / ') || 'Taille unique'}
+              ${[orderColorName(item.color), item.size].filter(Boolean).map(esc).join(' / ') || 'Taille unique'}
               &nbsp;·&nbsp;× ${esc(item.quantity)}
             </span>
           </td>
@@ -285,7 +437,7 @@ Deno.serve(async (req: Request) => {
       '',
       ...(items ?? []).map(
         (item: Record<string, unknown>) =>
-          `- ${item.product_name} | ${[item.color, item.size].filter(Boolean).join(' / ') || 'Taille unique'} | x${item.quantity} | ${money(item.total_price)}`,
+          `- ${item.product_name} | ${[orderColorName(item.color), item.size].filter(Boolean).join(' / ') || 'Taille unique'} | x${item.quantity} | ${money(item.total_price)}`,
       ),
       '',
       `Sous-total : ${money(order.subtotal)}`,
@@ -331,7 +483,7 @@ Deno.serve(async (req: Request) => {
         '',
         ...(items ?? []).map(
           (item: Record<string, unknown>) =>
-            `- ${item.product_name} | ${[item.color, item.size].filter(Boolean).join(' / ') || 'Taille unique'} | x${item.quantity} | ${money(item.total_price)}`,
+            `- ${item.product_name} | ${[orderColorName(item.color), item.size].filter(Boolean).join(' / ') || 'Taille unique'} | x${item.quantity} | ${money(item.total_price)}`,
         ),
         '',
         `Sous-total : ${money(order.subtotal)}`,
@@ -361,13 +513,18 @@ Deno.serve(async (req: Request) => {
               order_summary: orderSummary,
               order_id: order.order_number,
               order_date: new Date(order.created_at).toUTCString(),
-              orders: (items ?? []).map((item: Record<string, unknown>) => ({
-                name: item.product_name,
-                units: item.quantity,
-                price: money(item.unit_price),
-                line_total: money(item.total_price),
-                image: item.image_url || '',
-              })),
+              orders: (items ?? []).map((item: Record<string, unknown>) => {
+                const color = orderColorName(item.color)
+                return {
+                  name: color ? `${item.product_name} — ${color}` : item.product_name,
+                  color,
+                  size: item.size || 'Taille unique',
+                  units: item.quantity,
+                  price: money(item.unit_price),
+                  line_total: money(item.total_price),
+                  image: item.image_url || '',
+                }
+              }),
               cost: {
                 subtotal: money(order.subtotal),
                 shipping: money(order.shipping_cost),
@@ -386,7 +543,8 @@ Deno.serve(async (req: Request) => {
         })
 
         if (!response.ok) {
-          console.error('emailjs failed', response.status)
+          const detail = (await response.text()).slice(0, 500)
+          console.error('emailjs failed', response.status, detail)
           return json({ sent: false, error: "Le fournisseur d'emails a rejeté le message" }, 502)
         }
 

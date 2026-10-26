@@ -6,7 +6,7 @@
  * profiles and marketing content live here too.
  */
 import { supabase, uploadToStorage, deleteFromStorage } from './supabase'
-import { slugify } from './utils'
+import { slugify, colorName } from './utils'
 import {
   fetchProducts,
   fetchProductBySlug,
@@ -323,7 +323,7 @@ export async function createOrder({
   const productsById = new Map((productRows || []).map((row) => [row.id, row]))
   const variantIds = items.map((item) => item.variant_id).filter(Boolean)
   const { data: variantRows } = variantIds.length
-    ? await client.from('product_variants').select('id, product_id, color, size, sku, stock, price').in('id', variantIds)
+    ? await client.from('product_variants').select('id, product_id, color, color_name, size, sku, stock, price').in('id', variantIds)
     : { data: [] }
   const variantsById = new Map((variantRows || []).map((row) => [row.id, row]))
 
@@ -340,7 +340,7 @@ export async function createOrder({
 
     // Availability is checked before anything is written.
     if (variant && (variant.stock ?? 0) < quantity) {
-      throw new Error(`${product.name} (${variant.size} / ${variant.color}) est en rupture de stock`)
+      throw new Error(`${product.name} (${variant.size} / ${colorName(variant.color, variant.color_name)}) est en rupture de stock`)
     }
     if (!variant && (product.stock ?? 0) < quantity) {
       throw new Error(`${product.name} est en rupture de stock`)
@@ -355,7 +355,7 @@ export async function createOrder({
       product_id: product.id,
       variant_id: variant?.id || null,
       product_name: product.name,
-      color: variant?.color || null,
+      color: variant ? colorName(variant.color, variant.color_name) : null,
       size: variant?.size || null,
       image_url: image,
       quantity,
@@ -511,7 +511,7 @@ const PRODUCT_SELECT_LOCAL = `
   category:categories ( id, name, slug ),
   collection:collections ( id, name, slug, image_url ),
   product_images ( id, product_id, url, alt, position ),
-  product_variants ( id, product_id, color, size, sku, stock, price )
+  product_variants ( id, product_id, color, color_name, size, sku, stock, price )
 `
 
 export async function adminListProducts({ search = '', includeUnpublished = true } = {}) {
@@ -621,6 +621,7 @@ async function adminSaveVariants(productId, variants) {
       const row = {
         product_id: productId,
         color: variant.color || 'Black',
+        color_name: String(variant.color_name || colorName(variant.color)).trim(),
         size: variant.size,
         sku: variant.sku || null,
         stock: Math.max(0, Number(variant.stock) || 0),

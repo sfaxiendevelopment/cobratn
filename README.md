@@ -41,8 +41,11 @@ security, so the anon key is safe to ship in the browser bundle. **Never** put t
 
 1. Run `supabase/schema.sql` in the Supabase SQL editor. It is idempotent, so it is safe
    to re-run after a schema change.
-2. Optionally load `supabase/seed.sql` for a starter catalog.
-3. Promote an account to admin by setting `is_admin = true` on its `profiles` row.
+2. Run `supabase/product_color_names.sql` to add and populate French color names for
+   existing variants. The admin product editor then lets you set a French display
+   name separately from each color's hex swatch.
+3. Optionally load `supabase/seed.sql` for a starter catalog.
+4. Promote an account to admin by setting `is_admin = true` on its `profiles` row.
 
 `schema.sql` is the source of truth. It owns the tables, row level security policies,
 and the two RPCs the app depends on:
@@ -79,11 +82,16 @@ configured, followed by Resend and then Gmail SMTP.
    Update any dollar signs in the template to `TND`; order prices are Tunisian
    dinars. Remove or reword customer-facing promises such as tracking updates
    if they do not apply to this store notification.
+   Set the template's **From Name** to `COBRA TN - Commandes` if you want that
+   display name. EmailJS still sends from the email account connected to the
+   service; it does not provide a new sender mailbox.
 3. To add a download button, use this link in the template's HTML content:
    `<a href="{{order_pdf_url}}">Télécharger le bon de commande (PDF)</a>`.
    The function creates the PDF in a private Supabase Storage bucket and passes
    an expiring signed download URL. The link works for seven days; anyone with
-   the link can use it until it expires.
+   the link can use it until it expires. The PDF layout is recreated separately
+   by the function to follow the email's visual style; it is not rendered
+   directly from the EmailJS HTML.
 4. Copy the Service ID, Template ID, Public Key, and Private Key from the
    EmailJS dashboard. Keep the Private Key secret.
 5. In Supabase **Project Settings → Edge Functions → Secrets**, set:

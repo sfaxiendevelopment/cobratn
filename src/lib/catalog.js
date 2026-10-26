@@ -15,7 +15,7 @@ const PRODUCT_SELECT = `
   category:categories ( id, name, slug ),
   collection:collections ( id, name, slug, image_url ),
   product_images ( id, product_id, url, alt, position ),
-  product_variants ( id, product_id, color, size, sku, stock, price )
+  product_variants ( id, product_id, color, color_name, size, sku, stock, price )
 `
 
 /** Values a size/colour filter should offer, derived from live variants. */

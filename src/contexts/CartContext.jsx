@@ -1,5 +1,6 @@
 import { createContext, useContext, useEffect, useMemo, useState, useCallback } from 'react'
 import { getProductsByIds, validateCoupon } from '../lib/api'
+import { colorName } from '../lib/utils'
 
 const CartContext = createContext(null)
 const GUEST_KEY = 'cobra_guest_cart'
@@ -73,7 +74,7 @@ async function hydrate(references) {
         product,
         variant,
         unit_price: variant?.price ?? product.effective_price ?? 0,
-        color: variant?.color || null,
+        color: variant ? colorName(variant.color, variant.color_name) : null,
         size: variant?.size || null,
         image_url: product.images?.[0]?.url || null,
       }

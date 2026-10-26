@@ -140,8 +140,8 @@ export default function ProductCard({ product, eager = false, className = '' }) 
               {colors.map((c) => (
                 <span
                   key={c}
-                  title={colorName(c)}
-                  className="h-3 w-3 rounded-full border border-black/15"
+                  title={colorName(c, (product.variants || []).find((v) => v.color === c)?.color_name)}
+                  className="h-3 w-3 rounded-full border-2 border-neutral-500"
                   style={{ background: swatchFor(c) }}
                 />
               ))}
@@ -173,6 +173,7 @@ export function QuickViewModal() {
 
   const colors = [...new Set((product.variants || []).map((v) => v.color).filter(Boolean))]
   const activeColor = color || colors[0] || null
+  const activeColorName = colorName(activeColor, (product.variants || []).find((v) => v.color === activeColor)?.color_name)
   const sizes = [
     ...new Set(
       (product.variants || [])
@@ -231,20 +232,23 @@ export function QuickViewModal() {
           <div className="mt-6">
             <div className="mb-2 flex items-center justify-between">
               <span className="label">Couleur</span>
-              <span className="text-xs font-medium text-neutral-500">{colorName(activeColor)}</span>
+              <span className="text-xs font-medium text-neutral-500">{activeColorName}</span>
             </div>
             <div className="flex flex-wrap gap-2">
-              {colors.map((c) => (
-                <button
-                  key={c}
-                  type="button"
-                  onClick={() => { setColor(c); setSize(null) }}
-                  className={`h-7 w-7 rounded-full border ${activeColor === c ? 'border-black ring-1 ring-black' : 'border-black/15'}`}
-                  style={{ background: swatchFor(c) }}
-                  title={colorName(c)}
-                  aria-label={`Couleur ${colorName(c)}`}
-                />
-              ))}
+              {colors.map((c) => {
+                const label = colorName(c, (product.variants || []).find((v) => v.color === c)?.color_name)
+                return (
+                  <button
+                    key={c}
+                    type="button"
+                    onClick={() => { setColor(c); setSize(null) }}
+                    className={`h-7 w-7 rounded-full border-2 ${activeColor === c ? 'border-black ring-1 ring-black' : 'border-neutral-500'}`}
+                    style={{ background: swatchFor(c) }}
+                    title={label}
+                    aria-label={`Couleur ${label}`}
+                  />
+                )
+              })}
             </div>
           </div>
 

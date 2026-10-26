@@ -271,6 +271,7 @@ create table if not exists public.product_variants (
   id uuid primary key default gen_random_uuid(),
   product_id uuid not null references public.products(id) on delete cascade,
   color text not null default 'Black',
+  color_name text not null default '',
   size text not null,
   sku text,
   stock integer not null default 0 check (stock >= 0),
@@ -278,6 +279,9 @@ create table if not exists public.product_variants (
   created_at timestamptz not null default now(),
   unique (product_id, color, size)
 );
+
+alter table public.product_variants
+  add column if not exists color_name text not null default '';
 
 create table if not exists public.cart_items (
   id uuid primary key default gen_random_uuid(),

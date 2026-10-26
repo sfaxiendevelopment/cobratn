@@ -7,6 +7,7 @@ import { useDocumentMeta } from '../hooks/useDocumentMeta'
 import {
   formatPrice,
   formatDateTime,
+  colorName,
   ORDER_STATUSES,
   PAYMENT_STATUSES,
   PAYMENT_METHODS,
@@ -239,7 +240,7 @@ export default function OrderDetail() {
                               </div>
                             </td>
                             <td className="py-3 pr-3 text-xs text-neutral-400">{item.size || '—'}</td>
-                            <td className="py-3 pr-3 text-xs text-neutral-400">{item.color || '—'}</td>
+                            <td className="py-3 pr-3 text-xs text-neutral-400">{colorName(item.color) || '—'}</td>
                             <td className="py-3 pr-3 text-xs text-neutral-400">{item.quantity}</td>
                             <td className="py-3 pr-3 text-xs text-neutral-400">{formatPrice(item.unit_price)}</td>
                             <td className="py-3 text-xs font-bold text-white">{formatPrice(item.total_price)}</td>
